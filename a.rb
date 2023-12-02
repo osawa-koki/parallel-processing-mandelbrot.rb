@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 q = Thread::Queue.new
-[*1..100].each {|n| q.push(n)}
+[*1..100].each { |n| q.push(n) }
 
 threads = [*1..5].map do |i|
   Thread.new do
