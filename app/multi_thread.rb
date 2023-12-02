@@ -32,7 +32,7 @@ def multi_thread_execute
 
   thread_count = ENV['THREAD_COUNT'].to_i
 
-  queue = Queue.new
+  queue = Thread::Queue.new
 
   (0...filesize_width).each do |x|
     (0...filesize_height).each do |y|
