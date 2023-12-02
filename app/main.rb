@@ -5,7 +5,7 @@ require 'benchmark'
 require './app/simple'
 require './app/multi_thread'
 
-Benchmark.bm 10 do |r|
+Benchmark.bm 15 do |r|
   r.report 'simple' do
     simple_execute
   end

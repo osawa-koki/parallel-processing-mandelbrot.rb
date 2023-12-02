@@ -60,3 +60,5 @@ def simple_execute
   # 画像を保存
   png.save(output_path, interlace: true)
 end
+
+simple_execute if __FILE__ == $PROGRAM_NAME

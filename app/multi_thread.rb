@@ -30,38 +30,44 @@ def multi_thread_execute
   # 画像の初期化
   png = ChunkyPNG::Image.new(filesize_width, filesize_height, ChunkyPNG::Color::BLACK)
 
-  thread_count = 5
+  thread_count = ENV['THREAD_COUNT'].to_i
+
+  queue = Queue.new
+
+  (0...filesize_width).each do |x|
+    (0...filesize_height).each do |y|
+      queue.push([x, y])
+    end
+  end
 
   threads = []
 
-  (0...thread_count).each do |thread_index|
+  thread_count.times do
     threads << Thread.new do
-      (0...filesize_width).each do |x|
-        next unless x % thread_count == thread_index
+      until queue.empty?
+        x, y = queue.pop
 
-        (0...filesize_height).each do |y|
-          # 座標の変換
-          zx = x_min + (x_max - x_min) * x / filesize_width
-          zy = y_min + (y_max - y_min) * y / filesize_height
+        # 座標の変換
+        zx = x_min + (x_max - x_min) * x / filesize_width
+        zy = y_min + (y_max - y_min) * y / filesize_height
 
-          # マンデルブロ集合の計算
-          z = 0.0
-          iteration = 0
-          while z.abs < 2 && iteration < max_iterations
-            z = z * z + Complex(zx, zy)
-            iteration += 1
-          end
-
-          # ピクセルの色を設定
-          color = if iteration == max_iterations
-                    ChunkyPNG::Color::WHITE
-                  else
-                    ChunkyPNG::Color.rgb(iteration * 10 % 256, iteration * 10 % 256, iteration * 10 % 256)
-                  end
-
-          # 画像に描画
-          png[x, y] = color
+        # マンデルブロ集合の計算
+        z = 0.0
+        iteration = 0
+        while z.abs < 2 && iteration < max_iterations
+          z = z * z + Complex(zx, zy)
+          iteration += 1
         end
+
+        # ピクセルの色を設定
+        color = if iteration == max_iterations
+                  ChunkyPNG::Color::WHITE
+                else
+                  ChunkyPNG::Color.rgb(iteration * 10 % 256, iteration * 10 % 256, iteration * 10 % 256)
+                end
+
+        # 画像に描画
+        png[x, y] = color
       end
     end
   end
@@ -71,3 +77,5 @@ def multi_thread_execute
   # 画像を保存
   png.save(output_path, interlace: true)
 end
+
+multi_thread_execute if __FILE__ == $PROGRAM_NAME
